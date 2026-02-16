@@ -1,8 +1,5 @@
 pandas
-gspread
 python-dotenv
-openpyxl
-airbyte
 psycopg2-binary
 sqlalchemy
 sshtunnel

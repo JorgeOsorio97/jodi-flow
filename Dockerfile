@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create directories
-RUN mkdir -p data/raw data/db .airbyte_tmp
+RUN mkdir -p data/raw data/db
 
 # Default command
-CMD ["python", "-m", "src.extraction.meta_ads"]
+CMD ["python", "-m", "src.extraction.whatsapp_logs"]

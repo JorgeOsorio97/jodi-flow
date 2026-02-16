@@ -13,9 +13,6 @@ __pycache__/
 .env
 credentials.json
 
-# Airbyte temp files
-.airbyte_tmp/
-
 # DuckDB databases (will be created in container)
 data/db/*.duckdb
 data/db/*.duckdb.wal

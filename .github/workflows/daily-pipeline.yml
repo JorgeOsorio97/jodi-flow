@@ -1,19 +1,24 @@
 name: Daily Data Pipeline
 
 on:
-  schedule:
-    # Run daily at 6:00 AM UTC
-    - cron: '0 6 * * *'
-  workflow_dispatch: # Allow manual trigger
+  # schedule:
+  #   # Run daily at 6:00 AM UTC
+  #   - cron: '0 6 * * *'
+  workflow_dispatch: # Manual trigger only for now
 
 env:
-  GOOGLE_SPREADSHEET_ID: ${{ secrets.GOOGLE_SPREADSHEET_ID }}
-  GOOGLE_CREDENTIALS_PATH: /app/credentials.json
-  META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
-  META_ACCOUNT_ID: ${{ secrets.META_ACCOUNT_ID }}
+  POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+  POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+  POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+  POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+  POSTGRES_SCHEMA: ${{ secrets.POSTGRES_SCHEMA }}
+  SSH_BASTION_HOST: ${{ secrets.SSH_BASTION_HOST }}
+  SSH_BASTION_PORT: ${{ secrets.SSH_BASTION_PORT }}
+  SSH_BASTION_USER: ${{ secrets.SSH_BASTION_USER }}
 
 jobs:
-  extract-and-transform:
+  extract-whatsapp:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,17 +37,26 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Create credentials file
-        run: echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > credentials.json
+      - name: Configure SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.SSH_PRIVATE_KEY }}' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-      - name: Extract Meta Ads data
+      - name: Extract WhatsApp logs
         run: |
           docker run --rm \
-            -e GOOGLE_SPREADSHEET_ID \
-            -e GOOGLE_CREDENTIALS_PATH \
-            -e META_ACCESS_TOKEN \
-            -e META_ACCOUNT_ID \
-            -v ${{ github.workspace }}/credentials.json:/app/credentials.json:ro \
+            -e POSTGRES_HOST \
+            -e POSTGRES_PORT \
+            -e POSTGRES_DB \
+            -e POSTGRES_USER \
+            -e POSTGRES_PASSWORD \
+            -e POSTGRES_SCHEMA \
+            -e SSH_BASTION_HOST \
+            -e SSH_BASTION_PORT \
+            -e SSH_BASTION_USER \
+            -e SSH_KEY_PATH=/app/ssh_key \
+            -v ~/.ssh/id_rsa:/app/ssh_key:ro \
             -v ${{ github.workspace }}/data:/app/data \
             jodi-flow:latest \
-            python -m src.extraction.meta_ads
+            python -m src.extraction.whatsapp_logs /app/data/raw/
