@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Python
+.venv/
+.venv-*/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment and credentials
+.env
+credentials.json
+
+# Airbyte temp files
+.airbyte_tmp/
+
+# DuckDB databases (will be created in container)
+data/db/*.duckdb
+data/db/*.duckdb.wal
+
+# dbt artifacts
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+
+# IDE
+.idea/
+.vscode/
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Documentation
+*.md

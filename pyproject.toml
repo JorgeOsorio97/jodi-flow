@@ -1,0 +1,5 @@
+[project]
+name = "jodi-flow"
+version = "0.1.0"
+description = "JoDi Data Pipeline - Metrics pipeline using Google Sheets and DuckDB"
+requires-python = ">=3.11"

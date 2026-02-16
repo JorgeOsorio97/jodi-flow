@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-jodi}
+      POSTGRES_USER: ${POSTGRES_USER:-jodi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jodi}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jodi} -d ${POSTGRES_DB:-jodi}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  extract-meta-ads:
+    build: .
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: python -m src.extraction.meta_ads
+
+  setup-check:
+    build: .
+    command: python src/setup_check.py
+
+volumes:
+  postgres_data:

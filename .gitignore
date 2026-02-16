@@ -1,0 +1,29 @@
+# Credentials
+credentials.json
+*.json
+!dbt_project/**/*.json
+
+# Environment
+.env
+.venv/
+.venv-*/
+.airbyte_tmp/
+__pycache__/
+*.pyc
+
+# Data
+data/raw/
+data/db/
+
+# DuckDB
+data/db/*.duckdb
+data/db/*.duckdb.wal
+
+# dbt
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+
+# IDE
+.idea/
+.vscode/

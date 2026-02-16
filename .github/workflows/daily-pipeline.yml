@@ -1,0 +1,48 @@
+name: Daily Data Pipeline
+
+on:
+  schedule:
+    # Run daily at 6:00 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  GOOGLE_SPREADSHEET_ID: ${{ secrets.GOOGLE_SPREADSHEET_ID }}
+  GOOGLE_CREDENTIALS_PATH: /app/credentials.json
+  META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+  META_ACCOUNT_ID: ${{ secrets.META_ACCOUNT_ID }}
+
+jobs:
+  extract-and-transform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: jodi-flow:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create credentials file
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > credentials.json
+
+      - name: Extract Meta Ads data
+        run: |
+          docker run --rm \
+            -e GOOGLE_SPREADSHEET_ID \
+            -e GOOGLE_CREDENTIALS_PATH \
+            -e META_ACCESS_TOKEN \
+            -e META_ACCOUNT_ID \
+            -v ${{ github.workspace }}/credentials.json:/app/credentials.json:ro \
+            -v ${{ github.workspace }}/data:/app/data \
+            jodi-flow:latest \
+            python -m src.extraction.meta_ads
